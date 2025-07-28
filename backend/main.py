@@ -18,6 +18,10 @@ app.add_middleware(
 
 ultima_ficha_processada = {}
 
+@app.get("/")
+async def root() -> Any:
+    return {"message": "Bem-vindo à API de Processamento de Fichas Financeiras!"}
+
 @app.post("/upload-ficha")
 async def upload_ficha(file: UploadFile = File(...)) -> Any:
     global ultima_ficha_processada 
