@@ -4,7 +4,6 @@ from typing import Any
 import pdfplumber
 import tempfile
 import re
-from mangum import Mangum
 
 app = FastAPI()
 
@@ -158,7 +157,3 @@ def get_ficha_financeira_json() -> Any:
     if not ultima_ficha_processada:
         return {"mensagem": "Nenhuma ficha foi processada ainda."}
     return ultima_ficha_processada
-
-
-# Handler para Vercel
-handler = Mangum(app)
