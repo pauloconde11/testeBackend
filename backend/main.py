@@ -9,6 +9,7 @@ app = FastAPI()
 
 origins = [
     "https://vista-nova-navega.vercel.app",
+    "http://localhost:8080/"
 ]
 
 app.add_middleware(
