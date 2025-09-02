@@ -8,7 +8,7 @@ import re
 app = FastAPI()
 
 origins = [
-    "https://vista-nova-navega.vercel.app",
+    "https://vista-nova-navega-4075zwd38-paulocondes-projects.vercel.app",
     "http://localhost:8080"
 ]
 
