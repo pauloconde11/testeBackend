@@ -22,6 +22,11 @@ app.add_middleware(
 
 ultima_ficha_processada = {}
 
+def get_cell(linha, index, replace_text=""):
+    if len(linha) > index and linha[index]:
+        return linha[index].replace(replace_text, "").strip()
+    return ""
+
 @app.get("/")
 async def root() -> Any:
     return {"message": "Bem-vindo à API de Processamento de Fichas Financeiras!"}
@@ -73,24 +78,29 @@ async def upload_ficha(file: UploadFile = File(...)) -> Any:
                 texto_linha = " ".join([str(cell) if cell else "" for cell in linha])
 
                 if "NOME DO SERVIDOR" in texto_linha:
-                    dados_servidor["NOME"] = linha[0].replace("NOME DO SERVIDOR\n", "").strip()
+                    dados_servidor["NOME"] = get_cell(linha, 0, "NOME DO SERVIDOR\n")
+
                 elif "CPF" in texto_linha:
-                    dados_servidor["CPF"] = linha[16].replace("CPF\n", "").strip()
+                    dados_servidor["CPF"] = get_cell(linha, 16, "CPF\n")
+
                 elif "MAT. SIAPE" in texto_linha:
-                    dados_servidor["MATRICULA"] = linha[9].replace("MAT. SIAPE\n", "").strip()
+                    dados_servidor["MATRICULA"] = get_cell(linha, 9, "MAT. SIAPE\n")
+
                 elif "CARGO" in texto_linha:
-                    dados_servidor["CARGO"] = linha[0].replace("CARGO/EMPREGO\n", "").strip()
+                    dados_servidor["CARGO"] = get_cell(linha, 0, "CARGO/EMPREGO\n")
 
                 if "TOTAL BRUTO" in texto_linha:
                     partes = texto_linha.split("TOTAL BRUTO (R$)")
                     if len(partes) > 1:
                         bruto = partes[1].split("TOTAL DESCONTOS (R$")[0].strip()
                         totais["TOTAL BRUTO"] = bruto
+
                 elif "TOTAL DESCONTOS" in texto_linha:
                     partes = texto_linha.split("TOTAL DESCONTOS (R$)")
                     if len(partes) > 1:
                         descontos = partes[1].split("TOTAL LIQUIDO (R$")[0].strip()
                         totais["TOTAL DESCONTOS"] = descontos
+
                 elif "TOTAL LIQUIDO" in texto_linha:
                     partes = texto_linha.split("TOTAL LIQUIDO (R$)")
                     if len(partes) > 1:
@@ -99,18 +109,18 @@ async def upload_ficha(file: UploadFile = File(...)) -> Any:
                 if linha[0] in ["RENDIMENTOS", "DESCONTOS"]:
                     tipo_atual = linha[0]
 
-                discriminacao = linha[1] if len(linha) > 1 and linha[1] else None
+                discriminacao = get_cell(linha, 1)
                 if not discriminacao:
                     continue
 
                 valores = [
-                    linha[7] if len(linha) > 7 else "",
-                    linha[10] if len(linha) > 10 else "",
-                    linha[12] if len(linha) > 12 else "",
-                    linha[14] if len(linha) > 14 else "",
-                    linha[17] if len(linha) > 17 else "",
-                    linha[18] if len(linha) > 18 else "",
-                    linha[20] if len(linha) > 20 else "",
+                    get_cell(linha, 7),
+                    get_cell(linha, 10),
+                    get_cell(linha, 12),
+                    get_cell(linha, 14),
+                    get_cell(linha, 17),
+                    get_cell(linha, 18),
+                    get_cell(linha, 20)
                 ]
 
                 registro = {
@@ -155,7 +165,6 @@ async def upload_ficha(file: UploadFile = File(...)) -> Any:
         "anos_encontrados": list({d['ANOREFERENCIA'] for d in dados_formatados if d.get('ANOREFERENCIA')}),
         "dados": ultima_ficha_processada
     }
-
 
 @app.get("/fichaFinanceiraJson")
 def get_ficha_financeira_json() -> Any:
